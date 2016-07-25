@@ -1,6 +1,6 @@
 <?php
 
-namespace Datashaman\Library;
+namespace Datashaman\Elasticsearch\Cache\Tests;
 
 use DB;
 use Eloquent;

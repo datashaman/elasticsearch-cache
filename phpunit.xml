@@ -17,6 +17,7 @@
 
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="SomeRandomString"/>
     </php>
 
     <filter>
