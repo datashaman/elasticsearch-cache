@@ -1,0 +1,8 @@
+/build/
+/reports/
+/vendor/
+/composer.phar
+/composer.lock
+.DS_Store
+.env
+Thumbs.db
