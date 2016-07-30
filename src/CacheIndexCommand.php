@@ -40,7 +40,7 @@ class CacheIndexCommand extends Command
     public function fire()
     {
         $client = ClientBuilder::create()->build();
-        $index = $this->argument('index', 'cache');
+        $index = $this->argument('index', 'laravel-cache');
 
         $client->indices()->create([
             'index' => $index,

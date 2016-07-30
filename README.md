@@ -23,9 +23,44 @@ Install the package from packagist.org by editing composer.json to include the f
         }
     }
 
+Run `composer update` to install the latest package.
+
 *NB* This is currently *ALPHA* quality software. Not for production use yet.
 
 ## Usage
+
+Replace the `CacheServiceProvider` in `config/app.php`:
+
+    
+    'providers' => [
+        ...
+        'Illuminate\Broadcasting\BroadcastServiceProvider',
+        //'Illuminate\Cache\CacheServiceProvider',
+        'Datashaman\Elasticsearch\Cache\ElasticsearchCacheServiceProvider',
+        'Illuminate\Foundation\Providers\ConsoleSupportServiceProvider',
+        ...
+    ]
+
+Create an index to store the cache:
+
+    php artisan cache:index [index]
+
+Index name is *laravel-cache* by default. Ensure that the laravel `prefix` matches `config/cache.php`.
+
+In `.env` file, set `CACHE_DRIVER` to *elasticsearch*, and add the following to `config/cache.php`:
+
+    
+	'stores' => [
+        ...
+		'elasticsearch' => [
+            'driver' => 'elasticsearch',
+            'client' => [                   # Optional Elasticsearch client config
+            ],
+        ],
+        ...
+    ]
+
+Then use the `Cache` facade as you would normally.
 
 ## License
 
