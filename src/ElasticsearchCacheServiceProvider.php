@@ -14,14 +14,28 @@ class ElasticsearchCacheServiceProvider extends CacheServiceProvider
      */
     public function register()
     {
+        parent::register();
+
         $this->app->singleton('cache', function ($app) {
             return new CacheManager($app);
         });
 
-        $this->app->singleton('cache.store', function ($app) {
-            return $app['cache']->driver();
+        $this->registerCommands();
+    }
+
+    public function registerCommands()
+    {
+        parent::registerCommands();
+
+        $this->app->singleton('command.cache.index', function ($app) {
+            return new CacheIndexCommand();
         });
 
-        $this->registerCommands();
+        $this->commands('command.cache.index');
+    }
+
+    public function provides()
+    {
+        return parent::provides() + [ 'command.cache.index' ];
     }
 }

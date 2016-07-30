@@ -18,6 +18,6 @@ class CacheManager extends \Illuminate\Cache\CacheManager
 
         $client = ClientBuilder::fromConfig($config['client']);
 
-        return $this->repository(new ElasticsearchStore($client, $prefix, $config['index']));
+        return $this->repository(new ElasticsearchStore($client, $prefix));
     }
 }

@@ -19,42 +19,42 @@ class ElasticsearchStore extends TaggableStore implements Store
     protected $client;
 
     /**
-     * The prefix (is used as Elasticsearch type)
+     * The prefix, used in creating the Elasticsearch index name (prefix-cache).
      *
      * @var string
      */
     protected $prefix;
 
     /**
-     * The Elasticsearch index name used for storage.
+     * The Elasticsearch document type.
      *
      * @var string
      */
-    protected $index;
+    protected $type = 'cache';
 
     /**
      * Create a new Elasticsearch store.
      *
      * @param  \Elasticsearch\Client  $client
-     * @param  string                 $index
-     * @param  string                 $type
+     * @param  string                 $prefix
      * @return void
      */
-    public function __construct(Client $client, $prefix='item', $index='cache')
+    public function __construct(Client $client, $prefix='')
     {
         $this->setPrefix($prefix);
-        $this->setIndex($index);
         $this->client = $client;
     }
 
     protected function unserialize($value)
     {
-        return json_decode($value);
+        // return json_decode($value, true);
+        return is_numeric($value) ? $value : unserialize($value);
     }
 
     protected function serialize($value)
     {
-        return json_encode($value);
+        // return json_encode($value);
+        return is_numeric($value) ? $value : serialize($value);
     }
 
     protected function resolveWait($result)
@@ -78,8 +78,8 @@ class ElasticsearchStore extends TaggableStore implements Store
         while (true) {
             try {
                 $response = $this->client->get([
-                    'index' => $this->index,
-                    'type' => $this->prefix,
+                    'index' => $this->getIndex(),
+                    'type' => $this->type,
                     'id' => $key,
                 ]);
 
@@ -109,13 +109,13 @@ class ElasticsearchStore extends TaggableStore implements Store
     public function many(array $keys)
     {
         $params = [
-            'index' => $this->index,
+            'index' => $this->getIndex(),
             'body' => [
                 'query' => [
                     'constant_score' => [
                         'filter' => [
                             'ids' => [
-                                'type' => $this->prefix,
+                                'type' => $this->type,
                                 'values' => $keys,
                             ],
                         ],
@@ -150,8 +150,8 @@ class ElasticsearchStore extends TaggableStore implements Store
         $value = $this->serialize($value);
 
         $params = [
-            'index' => $this->index,
-            'type' => $this->prefix,
+            'index' => $this->getIndex(),
+            'type' => $this->type,
             'id' => $key,
             'body' => compact('value'),
         ];
@@ -194,8 +194,8 @@ class ElasticsearchStore extends TaggableStore implements Store
             ->implode("\n") . "\n";
 
         $params = [
-            'index' => $this->index,
-            'type' => $this->prefix,
+            'index' => $this->getIndex(),
+            'type' => $this->type,
             'body' => $body,
         ];
 
@@ -218,8 +218,8 @@ class ElasticsearchStore extends TaggableStore implements Store
         $doc = compact('value');
 
         $params = [
-            'index' => $this->index,
-            'type' => $this->prefix,
+            'index' => $this->getIndex(),
+            'type' => $this->type,
             'id' => $key,
             'body' => compact('doc'),
             'retry_on_conflict' => 3,
@@ -261,8 +261,8 @@ class ElasticsearchStore extends TaggableStore implements Store
     public function forget($key)
     {
         $params = [
-            'index' => $this->index,
-            'type' => $this->prefix,
+            'index' => $this->getIndex(),
+            'type' => $this->type,
             'id' => $key,
         ];
 
@@ -275,12 +275,10 @@ class ElasticsearchStore extends TaggableStore implements Store
             'search_type' => 'scan',    // use search_type=scan
             'scroll' => $scroll,        // the length of time to hold the context consistent (make it short, eg 10s)
             'size' => $size,            // how many results *per shard* you want back
-            'index' => $this->index,
-            'type' => $this->prefix,
+            'index' => $this->getIndex(),
+            'type' => $this->type,
             'body' => [
-                'query' => [
-                    "match_all" => []
-                ]
+                'query' => $query,
             ]
         ];
 
@@ -324,24 +322,24 @@ class ElasticsearchStore extends TaggableStore implements Store
     }
 
     /**
-     * Get the prefix added to the key.
+     * Get the prefix. (used as index)
      *
      * @return string
      */
     public function getPrefix()
     {
-        return $this->prefix;
+        return $this->index;
     }
 
     /**
-     * Set the prefix added to the key.
+     * Set the prefix. (used as index)
      *
      * @param  string  $prefix
      * @return void
      */
     public function setPrefix($prefix)
     {
-        $this->prefix = $prefix;
+        $this->index = $prefix;
     }
 
     /**
@@ -351,38 +349,6 @@ class ElasticsearchStore extends TaggableStore implements Store
      */
     public function getIndex()
     {
-        return $this->index;
-    }
-
-    /**
-     * Set the Elasticsearch index name.
-     *
-     * @param  string  $index
-     * @return void
-     */
-    public function setIndex($index)
-    {
-        $this->index = $index;
-    }
-
-    /**
-     * Get the Elasticsearch document type (uses prefix).
-     *
-     * @return string
-     */
-    public function getType()
-    {
-        return $this->prefix;
-    }
-
-    /**
-     * Set the Elasticsearch document type (uses prefix).
-     *
-     * @param  string  $type
-     * @return void
-     */
-    public function setType($type)
-    {
-        $this->prefix = $type;
+        return $this->prefix.'-cache';
     }
 }
