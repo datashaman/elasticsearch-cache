@@ -3,7 +3,6 @@
 namespace Datashaman\Elasticsearch\Cache;
 
 use Elasticsearch\Client;
-use Elasticsearch\ClientBuilder;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
 use Elasticsearch\Common\Exceptions\ServerErrorResponseException;
 use GuzzleHttp\Ring\Future\FutureArray;

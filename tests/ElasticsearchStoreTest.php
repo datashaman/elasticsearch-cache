@@ -4,7 +4,6 @@ namespace Datashaman\Elasticsearch\Cache\Tests;
 
 use Datashaman\Elasticsearch\Cache\ElasticsearchStore;
 use Elasticsearch\ClientBuilder;
-use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
 
 class ElasticsearchStoreTest extends TestCase
 {
@@ -43,6 +42,12 @@ class ElasticsearchStoreTest extends TestCase
         ]));
 
         $this->store = new ElasticsearchStore($this->client);
+    }
+
+    public function tearDown()
+    {
+        // $this->client->indices()->delete(['index' => 'cache']);
+        parent::tearDown();
     }
 
     protected function resolveWait($result)
@@ -128,11 +133,5 @@ class ElasticsearchStoreTest extends TestCase
         $this->assertNull($this->store->get('foo'));
         $this->assertNull($this->store->get('bar'));
         $this->assertNull($this->store->get('bat'));
-    }
-
-    public function tearDown()
-    {
-        // $this->client->indices()->delete(['index' => 'cache']);
-        parent::tearDown();
     }
 }
