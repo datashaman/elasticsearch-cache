@@ -328,7 +328,7 @@ class ElasticsearchStore extends TaggableStore implements Store
      */
     public function getPrefix()
     {
-        return $this->index;
+        return $this->prefix;
     }
 
     /**
@@ -339,7 +339,7 @@ class ElasticsearchStore extends TaggableStore implements Store
      */
     public function setPrefix($prefix)
     {
-        $this->index = $prefix;
+        $this->prefix = $prefix;
     }
 
     /**

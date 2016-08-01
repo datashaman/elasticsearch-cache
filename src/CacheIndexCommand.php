@@ -13,24 +13,14 @@ class CacheIndexCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'cache:index {index}';
+    protected $signature = 'cache:index {index=laravel-cache}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create an index for the Elasticsearch cache.';
-
-    /**
-     * Create a new cache index in Elasticsearch.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    protected $description = 'Create an index for the Elasticsearch cache (DESTRUCTIVE, overwrites existing cache index).';
 
     /**
      * Execute the console command.
@@ -42,17 +32,20 @@ class CacheIndexCommand extends Command
         $client = ClientBuilder::create()->build();
         $index = $this->argument('index', 'laravel-cache');
 
+        $client->indices()->delete([
+            'index' => $index,
+        ]);
+
         $client->indices()->create([
             'index' => $index,
             'body' => [
                 'mappings' => [
-                    'type' => [
+                    'cache' => [
                         'properties' => [
                             'value' => [
                                 'type' => 'string',
                                 'index' => 'not_analyzed',
                             ],
-
                         ],
                     ],
                 ],
